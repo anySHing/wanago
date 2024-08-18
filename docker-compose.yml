@@ -1,11 +1,11 @@
 services:
   postgres:
     container_name: postgres
-    image: postgres:latest
+    image: postgres:14-alpine
     ports:
-      - '5432:5432'
+      - 5432:5432
     volumes:
-      - ./data/postgres:/data/postgres
+      - ./data/postgres:/var/lib/postgresql/data
     env_file:
       - docker.env
     networks:
@@ -13,19 +13,17 @@ services:
 
   pgadmin:
     container_name: pgadmin
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:8.10
     ports:
-      - '8080:80'
+      - 8080:80
     volumes:
-      - ./data/pgadmin:/root/.pgadmin
+      - ./data/pgadmin:/var/lib/pgadmin
     env_file:
       - docker.env
     networks:
       - postgres
     depends_on:
       - postgres
-    environment:
-      - PGADMIN_DEFAULT_HOST=postgres
 
 networks:
   postgres:

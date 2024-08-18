@@ -1,52 +1,49 @@
-import { Controller } from '@nestjs/common/interfaces';
-import PostsService from './posts.service';
-import { Request, Response, Router } from 'express';
-import { CreatePostDto } from './dto/create-post.dto';
-import { UpdatePostDto } from './dto/update-post.dto';
+import { NextFunction, Request, Response } from 'express';
+import CreatePostDto from './dto/create-post.dto';
+import UpdatePostDto from './dto/update-post.dto';
+import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { PostsService } from './posts.service';
+import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
+@Controller('post')
+export default class PostsController {
+  constructor(private readonly postsService: PostsService) {}
 
-export default class PostsController implements Controller {
-  private path = '/posts';
-  public router = Router();
-  private PostsService = new PostsService();
-
-  constructor() {
-    this.initializeRoutes();
+  @Post()
+  @UseGuards(JwtAuthenticationGuard)
+  async createPost(@Body() post: CreatePostDto) {
+    return this.postsService.createPost(post);
   }
 
-  initializeRoutes() {
-    this.router.get(this.path, this.getAllPosts);
-    this.router.get(`${this.path}/:id`, this.getPostById);
-    this.router.post(this.path, this.createPost);
-    this.router.put(`${this.path}/:id`, this.replacePost);
-  }
+  getAllPosts = async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
 
-  private getAllPosts = (req: Request, res: Response) => {
-    const posts = this.PostsService.getAllPosts();
+    try {
+      const post = await this.postsService.getPostById();
+      res.send(post);
+    } catch (e) {
+      const err = e as Error;
+      next(err);
+    }
+
+    const posts = this.postsService.getAllPosts();
     res.send(posts);
   };
 
-  private getPostById = (req: Request, res: Response) => {
-    const id = req.params.id;
-    const post = this.PostsService.getPostById(Number(id));
-    res.send(post);
-  };
-
-  private createPost = (req: Request, res: Response) => {
-    const post: CreatePostDto = req.body;
-    const createdPost = this.PostsService.CreatePost(post);
-    res.send(createdPost);
-  };
+  @Get(':id')
+  getPostById(@Param('id') id: string) {
+    return this.postsService.getPostById(Number(id));
+  }
 
   private replacePost = (req: Request, res: Response) => {
     const id = req.params.id;
     const post: UpdatePostDto = req.body;
-    const replacedPost = this.PostsService.replacePost(Number(id), post);
+    const replacedPost = this.postsService.updatePost(Number(id), post);
     res.send(replacedPost);
   };
 
   private deletePost = (req: Request, res: Response) => {
     const id = req.params.id;
-    this.PostsService.deletePost(Number(id));
+    this.postsService.deletePost(Number(id));
     res.sendStatus(200);
   };
 }
