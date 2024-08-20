@@ -1,9 +1,19 @@
 import { NextFunction, Request, Response } from 'express';
 import CreatePostDto from './dto/create-post.dto';
 import UpdatePostDto from './dto/update-post.dto';
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  UseFilters,
+  UseGuards,
+} from '@nestjs/common';
 import { PostsService } from './posts.service';
 import JwtAuthenticationGuard from 'src/authentication/jwt-authentication.guard';
+import { ExceptionsLoggerFilter } from 'src/utils/exceptionsLogger.filter';
+import { FindOneParams } from 'src/utils/findOneParams';
 @Controller('post')
 export default class PostsController {
   constructor(private readonly postsService: PostsService) {}
@@ -30,7 +40,8 @@ export default class PostsController {
   };
 
   @Get(':id')
-  getPostById(@Param('id') id: string) {
+  @UseFilters(ExceptionsLoggerFilter)
+  getPostById(@Param() { id }: FindOneParams) {
     return this.postsService.getPostById(Number(id));
   }
 
