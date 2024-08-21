@@ -1,12 +1,15 @@
 import {
   Body,
+  ClassSerializerInterceptor,
   Controller,
   Get,
   HttpCode,
   Post,
   Req,
   Res,
+  SerializeOptions,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthenticationService } from './authentication.service';
 import RequestWithUser from './requestWithUser.interface';
@@ -17,6 +20,10 @@ import RegisterDto from './dto/register.dto';
 
 // 가드 사용
 @Controller('authentication')
+// @UseInterceptors(ClassSerializerInterceptor) // 전역으로도 사용 가능 main.ts에서
+@SerializeOptions({
+  strategy: 'excludeAll',
+})
 export class AuthenticationController {
   constructor(private readonly authenticationService: AuthenticationService) {}
 
@@ -28,12 +35,11 @@ export class AuthenticationController {
   @HttpCode(200)
   @UseGuards(LocalAuthenticationGuard)
   @Post('login')
-  async logIn(@Req() req: RequestWithUser, @Res() res: Response) {
+  async logIn(@Req() req: RequestWithUser) {
     const { user } = req;
     const cookie = this.authenticationService.getCookieWithJwtToken(user.id);
-    res.setHeader('Set-Cookie', cookie);
-    user.password = undefined;
-    return res.send(user);
+    req.res.setHeader('Set-Cookie', cookie);
+    return user;
   }
 
   @UseGuards(JwtAuthenticationGuard)
