@@ -27,8 +27,8 @@ import { ExceptionsLoggerFilter } from './utils/exceptionsLogger.filter';
       }),
     }),
     DatabaseModule,
-    UsersModule,
     AuthenticationModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
