@@ -14,3 +14,5 @@ const recursivelyStripNullValues = (value: unknown): unknown => {
     return value;
   }
 };
+
+export default recursivelyStripNullValues;

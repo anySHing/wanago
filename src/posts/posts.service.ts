@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import Post from './entities/post.entity';
 import User from 'src/users/entities/user.entity';
 import Category from 'src/categories/category.entity';
+import UpdateCategoryDto from 'src/categories/dto/updateCategory.dto';
 
 @Injectable()
 export class PostsService {
